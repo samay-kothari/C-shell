@@ -5,6 +5,11 @@
 #include"pinfoHandler.h"
 #include"unknownCommands.h"
 #include"history.h"
+#include"redirection.h"
+#include"jobs.h"
+#include"signalHandler.h"
+#include"bgHandler.h"
+#include"fgHandler.h"
 
 char *readInput(){
     char *str = (char *)malloc(VARIABLE_LENGTH*sizeof(char));
@@ -38,6 +43,8 @@ char **tokenizeInput(char *command){
 void checkCommand(char* command, int* flag){
     writeHistory(command);
     tokenizeInput(command);
+    changeInputFile();
+    changeOutputFile();
     if(strcmp(argumentInput[0], "echo") == 0){
         echo();
     }
@@ -52,6 +59,18 @@ void checkCommand(char* command, int* flag){
     }
     else if(strcmp(argumentInput[0], "pinfo") == 0){
         pinfo();
+    }
+    else if(strcmp(argumentInput[0], "jobs") == 0){
+        jobs();
+    }
+    else if(strcmp(argumentInput[0], "sig") == 0){
+        sig();
+    }
+    else if(strcmp(argumentInput[0], "bg") == 0){
+        bg();
+    }
+    else if(strcmp(argumentInput[0], "fg") == 0){
+        fg();
     }
     else if(strcmp(argumentInput[0], "exit") == 0){
         *flag = 1;
@@ -76,7 +95,12 @@ void checkCommand(char* command, int* flag){
     }
     else{
         manageUnknownCommands();
-        return;
+    }
+    if(isStdInChanged){
+        resetInputFile();
+    }
+    if(isStdOutChanged){
+        resetOutputFile();
     }
     return;
 }
@@ -100,4 +124,5 @@ void seprateMultipleCommand(char *command, int* flag){
     }
     return;
 }
+
 

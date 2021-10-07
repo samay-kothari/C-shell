@@ -77,7 +77,7 @@ void pinfo(){
 	}
 	
 	printf("Process Status -- ");
-	if((sepratedValues[2][0] == 'S' || sepratedValues[2][0] == 'R')&& (sepratedValues[4]==sepratedValues[7])){
+	if((sepratedValues[2][0] == 'S' || sepratedValues[2][0] == 'R')&& (sepratedValues[3]==sepratedValues[7])){
 		printf("%s+\n",sepratedValues[2]);
 	}
 	else{

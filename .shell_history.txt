@@ -1,4 +1,14 @@
-sleep 5 &
+gedit &
+
+fg 1
+
+gedit &
+
+fg 2
+
+jobs
+
+sig 2 9
 
 exit
 

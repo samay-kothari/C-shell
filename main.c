@@ -20,6 +20,10 @@ int main(){
         input = (char *)malloc(VARIABLE_LENGTH * sizeof(char));
         printf("%s ", prompt);
         fgets(input, VARIABLE_LENGTH, stdin);
+        if(input == NULL){
+            flag = 1;
+            break;
+        }
         if(strlen(input) > 0 && (strcmp(input, "\n")!=0)){
             seprateMultipleCommand(input, &flag);
         }

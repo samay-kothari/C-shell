@@ -34,13 +34,11 @@ memoryAllocationError(){
 }
 void sigStpHandler();
 void sigIntHandler(){
-    printf("lollmalol\n");
     if(currentForegroundProcess != shellPID){
         kill(currentForegroundProcess, SIGINT);
         currentForegroundProcess = shellPID;
     }else{
         printf("\n");
-        initialisePrompt();
     }
     signal(SIGINT, sigIntHandler);
     signal(SIGTSTP, sigStpHandler);

@@ -40,11 +40,9 @@ char **tokenizeInput(char *command){
     return argumentInput;
 }
 
-void checkCommand(char* command, int* flag){
-    writeHistory(command);
-    tokenizeInput(command);
-    changeInputFile();
-    changeOutputFile();
+void preCommand();
+
+void checkCommand(int* flag){
     if(strcmp(argumentInput[0], "echo") == 0){
         echo();
     }
@@ -87,7 +85,7 @@ void checkCommand(char* command, int* flag){
         strcpy(storageCommand, nextCommand);
         for(int j = 0; j < times; j++){
             strcpy(nextCommand, storageCommand);
-            checkCommand(nextCommand, &flag);
+            preCommand(nextCommand, &flag);
         }
     }
     else if(strcmp(argumentInput[0], "history") == 0){
@@ -103,6 +101,64 @@ void checkCommand(char* command, int* flag){
         resetOutputFile();
     }
     return;
+}
+void doPiping(int in, int out, int* flag)
+{
+    pid_t pid = fork();
+    if (pid == 0)
+    {
+        argumentInput[argumentNumber] = NULL;
+        if (in != 0)
+        {
+            dup2(in, 0);
+            close(in);
+        }
+        if (out != 1)
+        {
+            dup2(out, 1);
+            close(out);
+        }
+        checkCommand(&flag);
+        exit(0);
+    }
+    waitpid(pid, NULL, WUNTRACED);
+}
+void checkPipes(int* flag){
+    int fd[2];
+    int input = 0;
+    int tempArgumentNumber = argumentNumber;
+    char** tempArgumentInput = argumentInput;
+    argumentNumber = 1;
+    for(int i = 1 ; i < tempArgumentNumber ; i++){
+        printf("%d %s\n", argumentNumber, argumentInput[0]);
+        if(strcmp(tempArgumentInput[i], "|") == 0){
+            pipe(fd);
+            doPiping(input, fd[1], flag);
+            close(fd[1]);
+            input = fd[0];
+            argumentInput = argumentInput + argumentNumber;
+            argumentInput++;
+            argumentNumber = 1;
+            i++;
+        }else{
+            argumentNumber++;
+        }
+    }
+    printf("%d %s\n", argumentNumber, argumentInput[0]);
+    doPiping(input, 1, flag);
+    argumentNumber = tempArgumentNumber;
+    argumentInput = tempArgumentInput;
+}
+void preCommand(char* command, int* flag){
+    writeHistory(command);
+    tokenizeInput(command);
+    if(strcmp(argumentInput[0], "exit") == 0){
+        *flag = 1;
+        return;
+    }
+    changeInputFile();
+    changeOutputFile();
+    checkPipes(flag);
 }
 
 void seprateMultipleCommand(char *command, int* flag){
@@ -120,7 +176,7 @@ void seprateMultipleCommand(char *command, int* flag){
     sepratedCommands[k] = NULL;
     commandNumber = k;
     for (int i = 0; i < commandNumber; i++){
-        checkCommand(sepratedCommands[i], flag);
+        preCommand(sepratedCommands[i], flag);
     }
     return;
 }
